@@ -1,0 +1,7 @@
+
+
+export const FIND_MAIN_TAB = 'FIND_MAIN_TAB';
+
+export const FIND_SEARCH_CITY_TAB = 'FIND_SEARCH_CITY_TAB';
+
+export const FIND_SEARCH_MOVIE_TAB = 'FIND_SEARCH_MOVIE_TAB';
