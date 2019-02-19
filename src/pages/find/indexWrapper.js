@@ -4,12 +4,13 @@ import {StyleSheet} from 'react-native';
 import Main from './main/Main';
 import searchCity from './searchcity/SearchCity';
 import searchMovie from './searchmovie/SearchMovie';
+import {connect} from 'react-redux';
 
 const App = createStackNavigator({
     FIND_MAIN_TAB: {
         screen: Main,
         navigationOptions: {
-            header: null,
+            header: null
         }
     },
     FIND_SEARCH_CITY_TAB: {

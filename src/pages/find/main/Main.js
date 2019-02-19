@@ -3,17 +3,24 @@ import {View, Text, Image, StyleSheet, TextInput, TouchableOpacity,Alert} from '
 import AweIcon from 'react-native-vector-icons/FontAwesome';
 import {Input} from 'react-native-elements';
 import ScreenUtil from 'utils/ScreenUtil';
+import {connect} from 'react-redux';
+import {ChangeMainBarVisibleAction} from 'src/actions/ChangeMainBarVisibleAction';
+import NowPlaying from "./NowPlaying";
+import NextPlaying from "./NextPlaying";
+import ScrollableTabView from 'react-native-scrollable-tab-view';
 
-export default class Main extends React.Component {
+class Main extends React.Component {
 
     goToSelectCity() {
         Alert.alert('切换城市选择');
     }
 
     render() {
-        return <View>
+        const {hideBottomBarHandler} = this.props;
+
+        return <View style={{flex: 1}}>
             <View style={{marginLeft: '2%', marginRight: '2%', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                <TouchableOpacity style={styles.View1} onPress={this.goToSelectCity.bind(this)}>
+                <TouchableOpacity style={styles.View1} onPress={hideBottomBarHandler}>
                     <Text style={{color: '#494949', fontSize: ScreenUtil.scale(16)}}>杭州</Text>
                     <AweIcon name={'chevron-down'} color={'#494949'} style={{marginLeft: ScreenUtil.scale(5)}}/>
                 </TouchableOpacity>
@@ -37,9 +44,42 @@ export default class Main extends React.Component {
                 />
             </View>
 
+            <View style={{flex: 1}}>
+                <ScrollableTabView style={{flex: 1}}
+                                   tabBarTextStyle={{fontSize:ScreenUtil.scale(14)}}
+                                   tabBarActiveTextColor={'#4f4f4f'}
+                                   tabBarInactiveTextColor={'#9b9b9b'}
+                                   tabBarUnderlineStyle={{backgroundColor: '#494949',height: ScreenUtil.scale(2)}}>
+
+                    <NowPlaying tabLabel={'正在上映'}/>
+
+                    <NextPlaying  tabLabel={'即将上映'}/>
+
+                </ScrollableTabView>
+            </View>
+
         </View>
     }
 }
+
+const mapStateToProps = (state) => {
+    return state;
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {hideBottomBarHandler: ()=> dispatch(ChangeMainBarVisibleAction(false))};
+};
+
+/*const mergeProps = (state, dispatch, ownProps) => {
+    return ({
+        ...ownProps,
+        screenProps: {
+            ...ownProps.screenProps,
+            ...state,
+            ...dispatch,
+        }
+    })
+}*/
 
 const styles = StyleSheet.create({
     View1: {
@@ -47,3 +87,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     }
 });
+
+export default connect(mapStateToProps, mapDispatchToProps)(Main);

@@ -5,8 +5,12 @@ import MinePage from 'pages/mine/index';
 import FindIndexPage from 'pages/find/index';
 import ScreenUtil from 'util/ScreenUtil';
 import BottomBarIcon from 'pages/main/BottomBarIcon';
+import {connect} from 'react-redux';
 
-const AppNavigator = createBottomTabNavigator({
+const AppNavigator = createBottomTabNavigator(
+
+    {
+
         Find: {
             screen: FindIndexPage,
 
@@ -15,7 +19,7 @@ const AppNavigator = createBottomTabNavigator({
                     return <BottomBarIcon iconName={'share-square-o'} focused={focused}/>
                 },
                 tabBarLabel: '热映',
-                tabBarVisible: true
+                //
             }
         },
         Hot: {
@@ -44,6 +48,7 @@ const AppNavigator = createBottomTabNavigator({
         initialRouteName: "Find",
         tabBarOptions: {
             activeTintColor: '#0a0a0a',
+            tabBarVisible: false,
             labelStyle: {
                 fontSize: ScreenUtil.scale(14),
             },
@@ -57,5 +62,12 @@ const AppNavigator = createBottomTabNavigator({
     }
 );
 
+export default connect(
+    (state) => ({
+        needHide: state.changeMainBarVisibleReducer.needHide
+    }),
+    (dispatch) => ({
 
-export default createAppContainer(AppNavigator);
+        
+    })
+)(createAppContainer(AppNavigator));
