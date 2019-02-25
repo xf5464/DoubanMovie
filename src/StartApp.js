@@ -6,6 +6,7 @@ import FindIndexPage from 'pages/find/index';
 import ScreenUtil from 'util/ScreenUtil';
 import BottomBarIcon from 'pages/main/BottomBarIcon';
 import {connect} from 'react-redux';
+import CustomTabComponent from "./CustomTabBar";
 
 const AppNavigator = createBottomTabNavigator(
 
@@ -46,6 +47,7 @@ const AppNavigator = createBottomTabNavigator(
     },
     {
         initialRouteName: "Find",
+        tabBarComponent: CustomTabComponent,
         tabBarOptions: {
             activeTintColor: '#0a0a0a',
             tabBarVisible: false,

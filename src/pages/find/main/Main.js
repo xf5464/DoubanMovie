@@ -67,7 +67,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-    return {hideBottomBarHandler: ()=> dispatch(ChangeMainBarVisibleAction(false))};
+    return {hideBottomBarHandler: ()=> dispatch(ChangeMainBarVisibleAction(true))};
 };
 
 /*const mergeProps = (state, dispatch, ownProps) => {
