@@ -2,7 +2,8 @@ import React from 'react';
 import {FlatList, ScrollView, View, Text} from 'react-native';
 import ScreenUtil from 'src/util/ScreenUtil';
 import * as Progress from 'react-native-progress';
-import Log from 'src/pages/common/Log';
+import Log from 'src/util/logic/Log';
+import HorizontalRule from "./HorizontalRule";
 
 const axios = require('axios');
 
@@ -186,6 +187,9 @@ export default class PulldownFlatList extends React.Component {
         return <View></View>;
     }
 
+    renderSeparator() {
+        return <HorizontalRule/>
+    };
 
     render() {
         return <View  style={{
@@ -210,6 +214,7 @@ export default class PulldownFlatList extends React.Component {
                 renderItem={({item, separators}) => (
                     this.renderItemHandler(item, separators)
                 )}
+                ItemSeparatorComponent={this.renderSeparator}
             />
 
 {/*            {this.getLoadComponent()}*/}
