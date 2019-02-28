@@ -1,19 +1,55 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet, TextInput, TouchableOpacity,Alert} from 'react-native';
+import {View, Text, Image, StyleSheet, TextInput, TouchableOpacity,Alert, Keyboard} from 'react-native';
 import AweIcon from 'react-native-vector-icons/FontAwesome';
 import {Input} from 'react-native-elements';
-import ScreenUtil from 'utils/ScreenUtil';
+import ScreenUtil from 'src/util/ScreenUtil';
 import {connect} from 'react-redux';
-import {ChangeMainBarVisibleAction} from 'src/actions/ChangeMainBarVisibleAction';
+import {ChangeMainBarVisibleAction} from 'src/redux/actions/ChangeMainBarVisibleAction';
 import NowPlaying from "./NowPlaying";
 import NextPlaying from "./NextPlaying";
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 
 class Main extends React.Component {
 
+
+
     goToSelectCity() {
         Alert.alert('切换城市选择');
     }
+
+    componentWillMount() {
+        const didBlurSubscription = this.props.navigation.addListener(
+            'willFocus',
+            payload => {
+                console.log('willFocus', payload);
+            }
+        );
+
+        const didBlurSubscription1 = this.props.navigation.addListener(
+            'didFocus',
+            payload => {
+                console.log('didFocus', payload);
+            }
+        );
+
+        const didBlurSubscription2 = this.props.navigation.addListener(
+            'willBlur',
+            payload => {
+                console.log('willBlur', payload);
+            }
+        );
+
+        const didBlurSubscription3 = this.props.navigation.addListener(
+            'didBlur',
+            payload => {
+                console.log('didBlur', payload);
+            }
+        );
+    }
+
+    componentWillUnmount() {
+    }
+
 
     render() {
         const {hideBottomBarHandler} = this.props;
@@ -60,6 +96,7 @@ class Main extends React.Component {
 
         </View>
     }
+
 }
 
 const mapStateToProps = (state) => {

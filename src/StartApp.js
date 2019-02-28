@@ -1,12 +1,12 @@
 import React from 'react';
 import {createAppContainer, createBottomTabNavigator} from "react-navigation";
-import HotPage from 'pages/hot/index';
-import MinePage from 'pages/mine/index';
-import FindIndexPage from 'pages/find/index';
-import ScreenUtil from 'util/ScreenUtil';
-import BottomBarIcon from 'pages/main/BottomBarIcon';
+import HotPage from 'src/pages/hot/index';
+import MinePage from 'src/pages/mine/index';
+import FindIndexPage from 'src/pages/find/index';
+import ScreenUtil from 'src/util/ScreenUtil';
+import BottomBarIcon from 'src/pages/main/BottomBarIcon';
 import {connect} from 'react-redux';
-import CustomTabComponent from "./CustomTabBar";
+import MainTabBar from "src/MainTabBar";
 
 const AppNavigator = createBottomTabNavigator(
 
@@ -47,7 +47,7 @@ const AppNavigator = createBottomTabNavigator(
     },
     {
         initialRouteName: "Find",
-        tabBarComponent: CustomTabComponent,
+        tabBarComponent: MainTabBar,
         tabBarOptions: {
             activeTintColor: '#0a0a0a',
             tabBarVisible: false,

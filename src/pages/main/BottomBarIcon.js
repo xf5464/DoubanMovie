@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
 import AweIcon from 'react-native-vector-icons/FontAwesome';
-import ScreenUtil from "../../util/ScreenUtil";
+import ScreenUtil from "src/util/ScreenUtil";
 import PropTypes from 'prop-types';
 
 export default class BottomBarIcon extends React.Component {

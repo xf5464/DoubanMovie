@@ -11,7 +11,7 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 import {createStore} from 'redux';
 import Root from "./src/Root";
-import configureStore from './src/store/ConfigureStore';
+import configureStore from 'src/redux/store/ConfigureStore';
 import { Provider } from 'react-redux';
 
 

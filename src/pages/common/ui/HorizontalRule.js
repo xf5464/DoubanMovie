@@ -1,6 +1,6 @@
 import React from 'react';
 import {View} from 'react-native';
-import { ViewStyle,ViewPropTypes } from 'react-native';
+import { ViewStyle,ViewPropTypes,StyleSheet } from 'react-native';
 import ScreenUtil from "src/util/ScreenUtil";
 
 
@@ -25,7 +25,7 @@ export default class HorizontalRule extends React.Component {
         return <View
             style={[{
                 borderBottomColor: '#e2e3e4',
-                borderBottomWidth: ScreenUtil.scale(1),
+                borderBottomWidth: ScreenUtil.scale(1)//StyleSheet.hairlineWidth,//ScreenUtil.scale(1),
             }, lineStyle]}
         />
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import {View} from 'react-native';
 import { ViewStyle,ViewPropTypes } from 'react-native'
-import ScreenUtil from 'util/ScreenUtil';
+import ScreenUtil from 'src/util/ScreenUtil';
 
 export default class HorizontalRule extends React.Component {
 

@@ -8,10 +8,13 @@ import searchMovie from './searchmovie/SearchMovie';
 const App = createStackNavigator({
     FIND_MAIN_TAB: {
         screen: Main,
-        navigationOptions: {
-            header: null,
+
+
+        navigationOptions:  {
+            header: null
         }
     },
+
     FIND_SEARCH_CITY_TAB: {
         screen: searchCity,
         navigationOptions: {
@@ -26,12 +29,10 @@ const App = createStackNavigator({
     }
 
 }, {
-    headerLayoutPreset: 'center'
+    headerLayoutPreset: 'center',
 });
 
-const styles = StyleSheet.create({
-
-});
+const styles = StyleSheet.create({});
 
 
 export default createAppContainer(App);

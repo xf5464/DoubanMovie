@@ -1,5 +1,5 @@
 import {StyleSheet} from "react-native";
-import ScreenUtil from 'util/ScreenUtil'
+import ScreenUtil from 'src/util/ScreenUtil'
 
 const commonStyles = StyleSheet.create({
 

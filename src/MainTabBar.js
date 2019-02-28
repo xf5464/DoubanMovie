@@ -5,7 +5,7 @@ import { BottomTabBar } from 'react-navigation-tabs';
 import {createAppContainer} from "react-navigation";
 import {connect} from "react-redux";
 
-class CustomTabComponent extends React.Component<Prop, State> {
+class MainTabComponent extends React.Component<Prop, State> {
 
     render() {
 
@@ -29,4 +29,4 @@ export default connect(
 
 
     })
-)(CustomTabComponent);
+)(MainTabComponent);
