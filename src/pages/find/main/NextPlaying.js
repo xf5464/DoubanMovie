@@ -10,12 +10,15 @@ class NextPlaying extends NowPlaying {
         super(props);
 
         this.state.remoteApi = api.NEXT_PLAYING_MOVIE;
+
+        this.state.tabName = "NextPlaying";
     }
 }
 
 export default connect(
     (state) => ({
-        cityName: state.selectPlayingCityReducer.cityName
+        cityName: state.selectPlayingCityReducer.cityName,
+        tabName: state.findMovieTabChangeReducer.tabName,
     }),
     (dispatch) => ({
 

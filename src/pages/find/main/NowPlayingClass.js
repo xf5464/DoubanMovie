@@ -1,15 +1,15 @@
 import React from 'react';
-import {AsyncStorage, Text, TouchableHighlight, View, Image, StyleSheet} from 'react-native';
+import {AsyncStorage, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
 import ScreenUtil from 'src/util/ScreenUtil';
 import StringUtil from 'src/util/StringUtil';
 import * as api from 'src/services/DoubanApi';
 import PulldownFlatList from "src/pages/common/ui/PulldownFlatList";
 import LocalStorage from "src/util/logic/LocalStorage";
-import {Rating, Button} from 'react-native-elements';
+import {Button, Rating} from 'react-native-elements';
+import FastImage from 'react-native-fast-image';
+import TimeUtil from "../../../util/TimeUtil";
 
 const START_IMAGE = require('../../../res/images/star.png');
-
-import FastImage from 'react-native-fast-image';
 
 export default class NowPlaying extends PulldownFlatList {
 
@@ -20,10 +20,19 @@ export default class NowPlaying extends PulldownFlatList {
         this.state.remoteApi = api.NOW_PLAYING_MOVIE;
 
         this.state.rightContentHeight = 110;
+
+        this.state.tabName = "NowPlaying";
+
+        this.state.cacheValidTime = 60;
+
+        // LocalStorage.clear();
     }
 
     async tryLoad(url) {
+        // return;
+
         let t = this.hasLoadAllDataForList();
+
         if (t) {
             this.setState({isOnRefreshing: false});
 
@@ -42,16 +51,60 @@ export default class NowPlaying extends PulldownFlatList {
 
         console.log("开始加载 " + url);
 
-        let val = await AsyncStorage.getItem(url);//LocalStorage.get(url);
+        //读出来的，应该是数据加读取时间，然后时间跟现在判断下是不是超过一个间隔，超过的话去重新读
 
-        ret = JSON.parse(val);
+        let val = await AsyncStorage.getItem(this.state.tabName);
+
+        let isEmpty = this.state.saveList.length == 0;
+
+        let m1 = null;
+
+        if (this.state.needLoadCache) {
+
+            if (isEmpty) {
+
+                if (val != null) {
+
+                    m1 = JSON.parse(val);
+
+                    // console.log(val);
+
+                    let loadTime = m1.loadTime;
+
+                    let now = TimeUtil.getTimeStampSeconds();
+
+                    if (now - loadTime >= this.state.cacheValidTime) {
+                        console.log("timeout now:" + now + " loadTime:" + loadTime);
+
+                        let remove = await AsyncStorage.removeItem(this.state.tabName);
+
+                        m1 = null;
+                    }
+                    else {
+                        console.log("timeValid now:" + now + " loadTime:" + loadTime);
+                    }
+                }
+
+            }
+        }
+
+
+        ret = null;
+
+        if (m1) {
+            ret = m1[url];
+        }
+
+        // return;
+
+        // let val = await AsyncStorage.getItem(url);
 
         if (ret != null) {
 
             setTimeout(() => {
                 console.log("读到缓存:" + url);
 
-                this.handleResponse(url, ret);
+                this.handleResponse(url, ret, {fromCache: true});
 
                 this.finishLoadHandler();
             }, 1000)
@@ -64,6 +117,10 @@ export default class NowPlaying extends PulldownFlatList {
 
     }
 
+    onTabToggle() {
+        console.log('on toggle tab');
+    }
+
     getFullUrl(remoteUrl) {
 
         const {cityName} = this.props;
@@ -74,7 +131,7 @@ export default class NowPlaying extends PulldownFlatList {
     }
 
     //返回新的集合
-    handleResponse(url, data) {
+    async handleResponse(url, data, param) {
 
         if (data.start < this.state.saveList.length) {
             console.log("dunplicate start:" + data.start + " length:" + data.subjects.length);
@@ -82,7 +139,32 @@ export default class NowPlaying extends PulldownFlatList {
             return;
         }
 
-        LocalStorage.set(url, data);
+        let isFirstGroup = this.loadedNum() + data.subjects.length <= this.state.eachTimeLoadCount;
+
+        let val = await AsyncStorage.getItem(this.state.tabName);
+
+        if (val == null) {
+            val = {};
+        }
+        else {
+            val = JSON.parse(val);
+        }
+
+        let isFromCache = param && param != undefined && param.fromCache;
+
+        if (isFirstGroup && !isFromCache) {
+            let now = TimeUtil.getTimeStampSeconds();
+            val.loadTime = now;
+        }
+
+        if (!isFromCache) {
+
+            val[url] = data;
+
+            LocalStorage.set(this.state.tabName, val);
+
+            console.log("set data\n" + JSON.stringify(val));
+        }
 
         let subjects = data.subjects;
 
@@ -95,6 +177,7 @@ export default class NowPlaying extends PulldownFlatList {
                 }*/
 
         ret = this.state.saveList.concat(subjects);
+
 
         this.setState({
             totalCount: data.total,
@@ -155,6 +238,18 @@ export default class NowPlaying extends PulldownFlatList {
         }
 
 
+    }
+
+    componentWillReceiveProps(nextProps) {
+        console.log('nextProps:' + JSON.stringify(nextProps) + " tab:" + this.state.tabName);
+    }
+
+    render() {
+        const {tabName} = this.props;
+
+        console.log('call render in ' + this.state.tabName + "," + tabName);
+
+        return super.render();
     }
 
     renderItemHandler(item, separators) {
@@ -240,7 +335,7 @@ export default class NowPlaying extends PulldownFlatList {
                     </Text>
 
                     <Text numberOfLines={2} ellipsizeMode={'tail'}
-                          // onLayout={(event) => this.calculateRightContentHeight.bind(this)(event)}
+                        // onLayout={(event) => this.calculateRightContentHeight.bind(this)(event)}
                           style={{
                               fontSize: ScreenUtil.scale(14),
                               width: ScreenUtil.scale(140),

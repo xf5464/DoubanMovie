@@ -1,8 +1,6 @@
 import React from 'react';
-import {FlatList, ScrollView, View, Text} from 'react-native';
+import {ActivityIndicator, FlatList, Text, View} from 'react-native';
 import ScreenUtil from 'src/util/ScreenUtil';
-import * as Progress from 'react-native-progress';
-import Log from 'src/util/logic/Log';
 import HorizontalRule from "./HorizontalRule";
 
 const axios = require('axios');
@@ -25,7 +23,9 @@ export default class PulldownFlatList extends React.Component {
             initialScrollIndex: 0,
             hasScrolled: false,
             lastLoadTime: 0,
-            isPullDown: false
+            isPullDown: false,
+            needLoadCache: true,
+            cacheValidTime: 60000,//缓存失效时间秒数
         };
 
         this.onListRefresh = this.onListRefresh.bind(this);
@@ -49,6 +49,8 @@ export default class PulldownFlatList extends React.Component {
         this.onListRefresh();
     }
 
+    componentDidU
+
     getFullUrl(remoteUrl) {
         return "";
     }
@@ -58,7 +60,7 @@ export default class PulldownFlatList extends React.Component {
     }
 
     //返回新的集合
-    handleResponse(url, response) {
+    handleResponse(url, response, param) {
 
     };
 
@@ -75,7 +77,7 @@ export default class PulldownFlatList extends React.Component {
 
                 if (response.status == 200) {
 
-                    self.handleResponse(url, response.data);
+                    self.handleResponse(url, response.data, {fromCache: false});
                 }
             })
             .catch(function (error) {
@@ -175,14 +177,17 @@ export default class PulldownFlatList extends React.Component {
                 justifyContent: 'center',
                 alignItems: 'center'
             }}>
-                {<Progress.CircleSnail color={['black']} />}
+                <ActivityIndicator
+                    color={'#000000'}
+                    animating={true}
+                    size={ScreenUtil.scale(20)}/>
 
                 <Text style={{textAlign: 'center'}}>loading...</Text></View>
         }
 
-   /*     if (this.hasLoadAllDataForList()) {
-            return  <View><Text>已经拉到底了</Text></View>
-        }*/
+        /*     if (this.hasLoadAllDataForList()) {
+                 return  <View><Text>已经拉到底了</Text></View>
+             }*/
 
         return <View></View>;
     }
@@ -192,33 +197,34 @@ export default class PulldownFlatList extends React.Component {
     };
 
     render() {
-        return <View  style={{
-            flex: 1, alignItems: 'center',justifyContent: 'center',}}>
+        return <FlatList
+            onScroll={(event) => {
+                this.onViewDrag(event)
+            }}
+            ref='myFlatList'
+            style={{paddingLeft: 0, paddingRight: 0}}
+            data={this.state.saveList}
+            numColumns={this.state.listColumnNum}
+            keyExtractor={(item, index) => index.toString()}
+            onRefresh={this.onListRefresh}
+            inverted={false}
+            refreshing={this.state.isOnRefreshing}
+            onContentSizeChange={this.onListContentSizeChange}
+            /*  onEndReached={this._reachEnd.bind(this)}
+              onEndReachedThreshold={50}*/
+            ListFooterComponent={this._renderFoot.bind(this)}
+            renderItem={({item, separators}) => (
+                this.renderItemHandler(item, separators)
+            )}
+            ItemSeparatorComponent={this.renderSeparator}
+        />
 
-            <FlatList
-                onScroll={(event) => {
-                    this.onViewDrag(event)
-                }}
-                ref='myFlatList'
-                style={{paddingLeft: 0, paddingRight: 0}}
-                data={this.state.saveList}
-                numColumns={this.state.listColumnNum}
-                keyExtractor={(item, index) => index.toString()}
-                onRefresh={this.onListRefresh}
-                inverted={false}
-                refreshing={this.state.isOnRefreshing}
-                onContentSizeChange={this.onListContentSizeChange}
-                /*  onEndReached={this._reachEnd.bind(this)}
-                  onEndReachedThreshold={50}*/
-                  ListFooterComponent={this._renderFoot.bind(this)}
-                renderItem={({item, separators}) => (
-                    this.renderItemHandler(item, separators)
-                )}
-                ItemSeparatorComponent={this.renderSeparator}
-            />
+        // return <View  style={{
+        //     flex: 1, alignItems: 'center',justifyContent: 'center',}}>
 
-{/*            {this.getLoadComponent()}*/}
-        </View>
+
+        /*{            {this.getLoadComponent()}}*/
+        // </View>
     }
 
 }
