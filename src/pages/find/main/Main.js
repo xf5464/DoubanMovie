@@ -8,13 +8,25 @@ import {ChangeMainBarVisibleAction} from 'src/redux/actions/ChangeMainBarVisible
 import {FindMovieTabChangeAction} from 'src/redux/actions/FindMovieTabChangeAction';
 import NowPlaying from "./NowPlaying";
 import NextPlaying from "./NextPlaying";
-import ScrollableTabView from 'react-native-scrollable-tab-view';
+import ScrollableTabView,{DefaultTabBar} from 'react-native-scrollable-tab-view';
+import * as StackNavigatorName from "src/constant/StackNavigatorName";
+
 
 class Main extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        this.goToSelectCity = this.goToSelectCity.bind(this);
+    }
 
     goToSelectCity() {
-        Alert.alert('切换城市选择');
+        // Alert.alert('切换城市选择');
+        const {hideBottomBarHandler} = this.props;
+
+        hideBottomBarHandler(true);
+
+        this.props.navigation.navigate(StackNavigatorName.FIND_SEARCH_CITY_TAB);
     }
 
     componentWillMount() {
@@ -22,28 +34,28 @@ class Main extends React.Component {
         const didBlurSubscription = this.props.navigation.addListener(
             'willFocus',
             payload => {
-                console.log('Main illFocus', payload);
+                // console.log('Main illFocus', payload);
             }
         );
 
         const didBlurSubscription1 = this.props.navigation.addListener(
             'didFocus',
             payload => {
-                console.log('Main didFocus', payload);
+                // console.log('Main didFocus', payload);
             }
         );
 
         const didBlurSubscription2 = this.props.navigation.addListener(
             'willBlur',
             payload => {
-                console.log('Main willBlur', payload);
+                // console.log('Main willBlur', payload);
             }
         );
 
         const didBlurSubscription3 = this.props.navigation.addListener(
             'didBlur',
             payload => {
-                console.log('Main didBlur', payload);
+                // console.log('Main didBlur', payload);
             }
         );
     }
@@ -52,6 +64,9 @@ class Main extends React.Component {
     }
 
     testChangeTab(obj) {
+        //这个调用试了下在真机上会卡住 TODO
+        return;
+
         const {i, ref} = obj;
 
         let tabView = this.refs[ref.ref];
@@ -64,14 +79,13 @@ class Main extends React.Component {
     }
 
     render() {
-        const {hideBottomBarHandler} = this.props;
 
         return <View style={{flex: 1}}>
 
 
 
             <View style={{marginLeft: '2%', marginRight: '2%', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                <TouchableOpacity style={styles.View1} onPress={hideBottomBarHandler}>
+                <TouchableOpacity style={styles.View1} onPress={this.goToSelectCity}>
                     <Text style={{color: '#494949', fontSize: ScreenUtil.scale(16)}}>杭州</Text>
                     <AweIcon name={'chevron-down'} color={'#494949'} style={{marginLeft: ScreenUtil.scale(5)}}/>
                 </TouchableOpacity>
@@ -97,10 +111,11 @@ class Main extends React.Component {
 
             <View style={{flex: 1}}>
                 <ScrollableTabView style={{flex: 1}}
-                                   tabBarTextStyle={{fontSize:ScreenUtil.scale(14)}}
+                                   tabBarTextStyle={{fontSize:ScreenUtil.scale(16)}}
                                    tabBarActiveTextColor={'#4f4f4f'}
                                    tabBarInactiveTextColor={'#9b9b9b'}
                                    onChangeTab={(obj)=>{this.testChangeTab(obj)}}
+                                   renderTabBar={() => <DefaultTabBar tabStyle={{ paddingBottom: 0 }} />}
                                    tabBarUnderlineStyle={{backgroundColor: '#494949',height: ScreenUtil.scale(2)}}>
 
                     <NowPlaying tabLabel={'正在上映'} ref={'nowPlayingTab'}/>

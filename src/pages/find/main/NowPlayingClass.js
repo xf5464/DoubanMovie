@@ -23,8 +23,7 @@ export default class NowPlaying extends PulldownFlatList {
 
         this.state.tabName = "NowPlaying";
 
-        this.state.cacheValidTime = 60;
-
+        this.state.cacheValidTime = 24*60*60;
         // LocalStorage.clear();
     }
 
@@ -55,7 +54,7 @@ export default class NowPlaying extends PulldownFlatList {
 
         let val = await AsyncStorage.getItem(this.state.tabName);
 
-        let isEmpty = this.state.saveList.length == 0;
+        let isEmpty = this.state.saveList.length === 0;
 
         let m1 = null;
 
@@ -74,14 +73,14 @@ export default class NowPlaying extends PulldownFlatList {
                     let now = TimeUtil.getTimeStampSeconds();
 
                     if (now - loadTime >= this.state.cacheValidTime) {
-                        console.log("timeout now:" + now + " loadTime:" + loadTime);
+                        console.log("timeout now:" + now + " loadTime:" + loadTime + " past:" + (now - loadTime) + " seconds cache time:" + this.state.cacheValidTime);
 
                         let remove = await AsyncStorage.removeItem(this.state.tabName);
 
                         m1 = null;
                     }
                     else {
-                        console.log("timeValid now:" + now + " loadTime:" + loadTime);
+                        console.log("timeValid now:" + now + " loadTime:" + loadTime+ " past:" + (now - loadTime) + " seconds cache time:" + this.state.cacheValidTime);
                     }
                 }
 
@@ -168,14 +167,6 @@ export default class NowPlaying extends PulldownFlatList {
 
         let subjects = data.subjects;
 
-        // console.log(JSON.stringify(subjects));
-
-        /*        let ret = [];
-
-                for (let i = 0; i < subjects.length; i++) {
-                    ret.push({url: subjects[i].images.medium, title: subjects[i].title})
-                }*/
-
         ret = this.state.saveList.concat(subjects);
 
 
@@ -220,7 +211,8 @@ export default class NowPlaying extends PulldownFlatList {
             }}>
                 <Text style={{
                     paddingBottom: 6,
-                    color: '#ff6677'
+                    color: '#ff6677',
+                    fontSize: ScreenUtil.scale(14)
                 }}>{StringUtil.getCountStringForDisplay(item.collect_count)}人看过</Text>
 
                 <Button
@@ -232,7 +224,7 @@ export default class NowPlaying extends PulldownFlatList {
                         width: ScreenUtil.scale(65),
                         height: ScreenUtil.scale(35)
                     }}
-                    titleStyle={{color: '#ff6677'}}
+                    titleStyle={{color: '#ff6677', fontSize: ScreenUtil.scale(14)}}
                 />
             </View>
         }
