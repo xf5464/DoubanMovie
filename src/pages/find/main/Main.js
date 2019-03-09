@@ -80,13 +80,13 @@ class Main extends React.Component {
 
     render() {
 
+        const {cityName} = this.props;
+
         return <View style={{flex: 1}}>
-
-
 
             <View style={{marginLeft: '2%', marginRight: '2%', flexDirection: 'row', justifyContent: 'flex-start'}}>
                 <TouchableOpacity style={styles.View1} onPress={this.goToSelectCity}>
-                    <Text style={{color: '#494949', fontSize: ScreenUtil.scale(16)}}>杭州</Text>
+                    <Text style={{color: '#494949', fontSize: ScreenUtil.scale(16)}}>{cityName}</Text>
                     <AweIcon name={'chevron-down'} color={'#494949'} style={{marginLeft: ScreenUtil.scale(5)}}/>
                 </TouchableOpacity>
 
@@ -131,7 +131,7 @@ class Main extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-    return state;
+    return { cityName: state.selectPlayingCityReducer.cityName};
 };
 
 const mapDispatchToProps = (dispatch) => {

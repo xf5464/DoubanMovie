@@ -1,5 +1,5 @@
 import React from 'react';
-import {Alert, StyleSheet, Text, View} from 'react-native';
+import {Alert, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import AweIcon from 'react-native-vector-icons/FontAwesome5';
 import ScreenUtil from "src/util/ScreenUtil";
 import HorizontalRule from "src/pages/common/ui/HorizontalRule";
@@ -59,7 +59,7 @@ class SearchProvince extends React.Component {
     }
 
     componentDidMount() {
-        console.log('componentDidMount');
+        // console.log('componentDidMount');
     }
 
     _goBack() {
@@ -79,7 +79,7 @@ class SearchProvince extends React.Component {
     }
 
     textLayoutCallback(layout) {
-        console.log(layout);
+        // console.log(layout);
 
         this.setState({labelTipLeft:layout.x});
     }
@@ -89,10 +89,14 @@ class SearchProvince extends React.Component {
         let self = this;
 
         return <View style={{flex: 1}}>
-            <View  style={{flexDirection: 'row', width: '100%', alignItems: 'center', height: 50, justifyContent: 'center'}}>
+            <View  style={{flexDirection: 'row', width: '100%', alignItems: 'center', height: 50}}>
 
-                <AweIcon name={'chevron-left'} color={'#42bd56'} size={ScreenUtil.scale(26)}
-                         style={{position: 'absolute', left: ScreenUtil.scale(20)}} onPress={() => {this._goBack()}}/>
+                <TouchableOpacity onPress={() => {this._goBack()}}>
+                    <View  style={{flexDirection: 'row', width: ScreenUtil.scale(this.state.labelTipLeft), height:'100%', alignItems: 'center'}}>
+                        <AweIcon name={'chevron-left'} color={'#42bd56'} size={ScreenUtil.scale(26)}
+                                 style={{position: 'absolute', left: ScreenUtil.scale(20)}} />
+                    </View>
+                </TouchableOpacity>
 
                 <Text style={{position: 'absolute', left: this.state.labelTipLeft, fontSize: ScreenUtil.scale(18)}}>选择城市</Text>
   {/*              <ButtonGroup
@@ -109,14 +113,14 @@ class SearchProvince extends React.Component {
 
             <ScrollableTabView style={{flex: 1}}
                                ref={'tabScrollView'}
-                               tabBarTextStyle={{fontSize:ScreenUtil.scale(14), alignItems: 'center'}}
+                               tabBarTextStyle={{fontSize:ScreenUtil.scale(16), alignItems: 'center'}}
                                tabBarActiveTextColor={'#9fdaac'}
                                tabBarInactiveTextColor={'#9b9b9b'}
                                onChangeTab={(obj)=>{this._testChangeTab(obj)}}
                                renderTabBar={() => {return <CustomTopBar textLayoutCallback={self.textLayoutCallback} tabStyle={{ paddingBottom: 0}}/>;}}
                                tabBarUnderlineStyle={{backgroundColor: '#5aad65',height: ScreenUtil.scale(2)}}>
 
-                <China tabLabel={'国外'} />
+                <China tabLabel={'国内'} goBackToMain={this._goBack}/>
 
                 <Overseas  tabLabel={'海外'}/>
 
