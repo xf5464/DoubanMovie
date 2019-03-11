@@ -1,7 +1,7 @@
 import * as ActionTypes from 'src/constant/ActionTypes';
 
 let initState = {
-    cityName: '杭州'
+    cityName: ""
 };
 
 export default function SelectPlayingCityReducer(state=initState, action) {

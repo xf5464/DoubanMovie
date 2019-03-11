@@ -4,7 +4,7 @@ import {View, Text, Image, StyleSheet} from 'react-native';
 export default class index extends React.Component {
 
     componentWillMount() {
-        const didBlurSubscription = this.props.navigation.addListener(
+       /* const didBlurSubscription = this.props.navigation.addListener(
             'willFocus',
             payload => {
                 console.log('mine willFocus', payload);
@@ -30,7 +30,7 @@ export default class index extends React.Component {
             payload => {
                 console.log('mine  didBlur', payload);
             }
-        );
+        );*/
     }
 
     render() {

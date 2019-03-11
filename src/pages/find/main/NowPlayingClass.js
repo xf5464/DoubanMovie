@@ -11,7 +11,7 @@ import TimeUtil from "../../../util/TimeUtil";
 
 const START_IMAGE = require('../../../res/images/star.png');
 
-export default class NowPlaying extends PulldownFlatList {
+export default class NowPlayingClass extends PulldownFlatList {
 
 
     constructor(props) {
@@ -23,7 +23,7 @@ export default class NowPlaying extends PulldownFlatList {
 
         this.state.tabName = "NowPlaying";
 
-        this.state.cacheValidTime = 24*60*60;
+        this.state.cacheValidTime = 24 * 60 * 60;
         // LocalStorage.clear();
     }
 
@@ -52,7 +52,7 @@ export default class NowPlaying extends PulldownFlatList {
 
         //读出来的，应该是数据加读取时间，然后时间跟现在判断下是不是超过一个间隔，超过的话去重新读
 
-        let val = await AsyncStorage.getItem(this.state.tabName);
+        let val = await AsyncStorage.getItem(url);
 
         let isEmpty = this.state.saveList.length === 0;
 
@@ -60,12 +60,11 @@ export default class NowPlaying extends PulldownFlatList {
 
         if (this.state.needLoadCache) {
 
-            if (isEmpty) {
+            if (val != null) {
 
-                if (val != null) {
+                m1 = JSON.parse(val);
 
-                    m1 = JSON.parse(val);
-
+                if (isEmpty) {
                     // console.log(val);
 
                     let loadTime = m1.loadTime;
@@ -75,12 +74,10 @@ export default class NowPlaying extends PulldownFlatList {
                     if (now - loadTime >= this.state.cacheValidTime) {
                         console.log("timeout now:" + now + " loadTime:" + loadTime + " past:" + (now - loadTime) + " seconds cache time:" + this.state.cacheValidTime);
 
-                        let remove = await AsyncStorage.removeItem(this.state.tabName);
-
                         m1 = null;
                     }
                     else {
-                        console.log("timeValid now:" + now + " loadTime:" + loadTime+ " past:" + (now - loadTime) + " seconds cache time:" + this.state.cacheValidTime);
+                        console.log("timeValid now:" + now + " loadTime:" + loadTime + " past:" + (now - loadTime) + " seconds cache time:" + this.state.cacheValidTime);
                     }
                 }
 
@@ -88,7 +85,7 @@ export default class NowPlaying extends PulldownFlatList {
         }
 
 
-        ret = null;
+        let ret = null;
 
         if (m1) {
             ret = m1[url];
@@ -124,9 +121,27 @@ export default class NowPlaying extends PulldownFlatList {
 
         const {cityName} = this.props;
 
-        url = StringUtil.substitute(remoteUrl, [cityName, this.loadedNum(), this.state.eachTimeLoadCount]);
+        let newCityName = this.state.cityName;
+
+        let targetCityName = cityName;
+
+        if (newCityName !== undefined && newCityName !== cityName) {
+            targetCityName = newCityName;
+        }
+
+        url = StringUtil.substitute(remoteUrl, [targetCityName, this.loadedNum(), this.state.eachTimeLoadCount]);
 
         return url;
+    }
+
+    onListRefresh() {
+        const {cityName} = this.props;
+
+        if (cityName == "") {
+            return;
+        }
+
+        super.onListRefresh();
     }
 
     //返回新的集合
@@ -140,7 +155,7 @@ export default class NowPlaying extends PulldownFlatList {
 
         let isFirstGroup = this.loadedNum() + data.subjects.length <= this.state.eachTimeLoadCount;
 
-        let val = await AsyncStorage.getItem(this.state.tabName);
+        let val = await AsyncStorage.getItem(url);
 
         if (val == null) {
             val = {};
@@ -160,7 +175,7 @@ export default class NowPlaying extends PulldownFlatList {
 
             val[url] = data;
 
-            LocalStorage.set(this.state.tabName, val);
+            LocalStorage.set(url, val);
 
             console.log("set data\n" + JSON.stringify(val));
         }
@@ -179,7 +194,7 @@ export default class NowPlaying extends PulldownFlatList {
 
     calculateRightContentHeight(event) {
 
-        if (this.state.rightContentHeight != 0) {
+        if (this.state.rightContentHeight !== 0) {
             return;
         }
 
@@ -232,16 +247,53 @@ export default class NowPlaying extends PulldownFlatList {
 
     }
 
+    componentDidUpdate(prevProps) {
+        // console.log("this.props : " + JSON.stringify(this.props) + " prevProps:" + JSON.stringify(prevProps));
+    }
+
     componentWillReceiveProps(nextProps) {
         console.log('nextProps:' + JSON.stringify(nextProps) + " tab:" + this.state.tabName);
+
+        const {cityName} = this.props;
+
+        // const {cityName} = nextProps;
+
+        if (nextProps.cityName !== undefined && cityName != nextProps.cityName) {
+
+            // this.setState({
+            //     totalCount: -1,
+            //     saveList: []
+            // });
+
+            this.state.totalCount = -1;
+
+            this.state.saveList = [];
+
+            this.state.cityName = nextProps.cityName;
+
+            super.onListRefresh();
+        }
     }
 
     render() {
-        const {tabName} = this.props;
+        const {tabName, cityName} = this.props;
 
-        console.log('call render in ' + this.state.tabName + "," + tabName);
+        // console.log('call render in ' + this.state.tabName + "," + tabName + " cityName:" + cityName);
 
         return super.render();
+    }
+
+    componentWillUpdate() {
+        const {tabName, cityName} = this.props;
+
+        // console.log('call componentWillUpdate in ' + this.state.tabName + "," + tabName + " cityName:" + cityName);
+    }
+
+
+    getItemLayout(item, index) {
+        let ITEM_HEIGHT = ScreenUtil.scale(this.state.rightContentHeight + 1);
+
+        return {length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index}
     }
 
     renderItemHandler(item, separators) {
@@ -278,7 +330,7 @@ export default class NowPlaying extends PulldownFlatList {
                 <View style={{paddingLeft: ScreenUtil.scale(20)}}>
 
                     <FastImage style={{width: ScreenUtil.scale(54 * 1.7), height: ScreenUtil.scale(80 * 1.7)}}
-                               source={{uri: item.images.medium}}></FastImage>
+                               source={{uri: item.images.medium}}/>
 
                 </View>
 

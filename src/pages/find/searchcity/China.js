@@ -8,6 +8,7 @@ import {Geolocation} from "react-native-amap-geolocation";
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {SelectPlayingCityAction} from 'src/redux/actions/SelectPlayingCityAction';
 import {connect} from "react-redux";
+import LocationUtil from "src/util/LocationUtil";
 import * as StackNavigatorName from "src/constant/StackNavigatorName";
 
 
@@ -74,37 +75,30 @@ class China extends React.Component {
         this.getLocation();
     }
 
+    componentWillUnmount () {
+        this.isUnmount = true;
+    }
+
+    componentDidUpdate(prevProps) {
+        // console.log("this.props city name: " + this.props.selectPlayingCityReducer.cityName + " prevProps:" + prevProps.selectPlayingCityReducer.cityName);
+    }
+
     async getLocation() {
-        const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
-        );
-
-        console.log("granted:" + granted);
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            await Geolocation.init({
-                ios: "9bd6c82e77583020a73ef1af59d0c759",
-                android: "152916bfb90ba03569f7e1ee1720f160"
-            });
-
-            Geolocation.setOptions({
-                interval: 8000,
-                distanceFilter: 20
-            });
-
-            Geolocation.addLocationListener(this.onGetLocation);
-            Geolocation.start();
-        }
+        LocationUtil.getLocation(this.onGetLocation);
     }
 
     onGetLocation(location) {
-        if (location.city !== undefined) {
-            Geolocation.stop();
+        if (location.city === undefined) {
+            return;
         }
 
-        this.setState({city: location.city, location: location});
+        if (this.isUnmount === true) {
+            return;
+        }
 
-        console.log(location.toString())
+        this.setState({city: location.city.replace("市", ""), location: location});
+
+        // console.log(location.toString())
     }
 
     selectCityClickHanlder(name) {

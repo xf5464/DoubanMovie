@@ -29,7 +29,7 @@ class SearchProvince extends React.Component {
     }
 
     componentWillMount() {
-        const didBlurSubscription = this.props.navigation.addListener(
+       /* const didBlurSubscription = this.props.navigation.addListener(
             'willFocus',
             payload => {
                 // console.log('willFocus', payload);
@@ -55,7 +55,7 @@ class SearchProvince extends React.Component {
             payload => {
                 // console.log('didBlur', payload);
             }
-        );
+        );*/
     }
 
     componentDidMount() {

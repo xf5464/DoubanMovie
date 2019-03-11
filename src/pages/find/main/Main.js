@@ -6,10 +6,12 @@ import ScreenUtil from 'src/util/ScreenUtil';
 import {connect} from 'react-redux';
 import {ChangeMainBarVisibleAction} from 'src/redux/actions/ChangeMainBarVisibleAction';
 import {FindMovieTabChangeAction} from 'src/redux/actions/FindMovieTabChangeAction';
+import {SelectPlayingCityAction} from 'src/redux/actions/SelectPlayingCityAction';
 import NowPlaying from "./NowPlaying";
 import NextPlaying from "./NextPlaying";
 import ScrollableTabView,{DefaultTabBar} from 'react-native-scrollable-tab-view';
 import * as StackNavigatorName from "src/constant/StackNavigatorName";
+import LocationUtil from "src/util/LocationUtil";
 
 
 class Main extends React.Component {
@@ -18,6 +20,8 @@ class Main extends React.Component {
         super(props);
 
         this.goToSelectCity = this.goToSelectCity.bind(this);
+
+        this.onGetLocation = this.onGetLocation.bind(this);
     }
 
     goToSelectCity() {
@@ -27,6 +31,31 @@ class Main extends React.Component {
         hideBottomBarHandler(true);
 
         this.props.navigation.navigate(StackNavigatorName.FIND_SEARCH_CITY_TAB);
+    }
+
+    componentDidMount() {
+        this.getLocation();
+    }
+
+    getLocation() {
+        LocationUtil.getLocation(this.onGetLocation);
+    }
+
+    onGetLocation(location) {
+        if (location.city === undefined) {
+            return;
+        }
+
+        if (this.isUnmount === true) {
+            return;
+        }
+
+        // this.setState({city: location.city.replace("市", ""), location: location});
+
+        const {changeCityNameHandler} = this.props;
+
+        changeCityNameHandler(location.city.replace("市", ""));
+        // console.log(location.toString())
     }
 
     componentWillMount() {
@@ -61,6 +90,9 @@ class Main extends React.Component {
     }
 
     componentWillUnmount() {
+        this.isUnmount = true;
+
+        console.log("main componentWillUnmount");
     }
 
     testChangeTab(obj) {
@@ -136,7 +168,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {hideBottomBarHandler: ()=> dispatch(ChangeMainBarVisibleAction(true)),
-            findMovieTabChangeHandler: (tabName) => dispatch(FindMovieTabChangeAction(tabName))};
+            findMovieTabChangeHandler: (tabName) => dispatch(FindMovieTabChangeAction(tabName)),
+            changeCityNameHandler: (cityName) => dispatch(SelectPlayingCityAction(cityName))};
 };
 
 /*const mergeProps = (state, dispatch, ownProps) => {

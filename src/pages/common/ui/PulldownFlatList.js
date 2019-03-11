@@ -43,6 +43,8 @@ export default class PulldownFlatList extends React.Component {
         this.finishLoadHandler = this.finishLoadHandler.bind(this);
 
         this._tryPullDown = this._tryPullDown.bind(this);
+
+        this.getItemLayout = this.getItemLayout.bind(this);
     }
 
     componentDidMount() {
@@ -196,6 +198,10 @@ export default class PulldownFlatList extends React.Component {
         return <HorizontalRule/>
     };
 
+    getItemLayout(item, index) {
+        return {};
+    }
+
     render() {
         return <FlatList
             onScroll={(event) => {
@@ -217,6 +223,7 @@ export default class PulldownFlatList extends React.Component {
                 this.renderItemHandler(item, separators)
             )}
             ItemSeparatorComponent={this.renderSeparator}
+            getItemLayout={this.getItemLayout}
         />
 
         // return <View  style={{
