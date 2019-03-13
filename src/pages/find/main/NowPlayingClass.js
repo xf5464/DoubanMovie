@@ -291,9 +291,11 @@ export default class NowPlayingClass extends PulldownFlatList {
 
 
     getItemLayout(item, index) {
-        let ITEM_HEIGHT = ScreenUtil.scale(this.state.rightContentHeight + 1);
+        let ITEM_HEIGHT = ScreenUtil.scale(170);
 
-        return {length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index}
+        let seperatorHeight = ScreenUtil.scale(1);
+
+        return {length: ITEM_HEIGHT, offset: (ITEM_HEIGHT + seperatorHeight) * index, index}
     }
 
     renderItemHandler(item, separators) {

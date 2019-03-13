@@ -7,6 +7,7 @@ import ScreenUtil from "src/util/ScreenUtil";
 export default class HorizontalRule extends React.Component {
 
     static propTypes = {
+
         lineStyle: ViewPropTypes ? ViewPropTypes.style : View.propTypes.style,
     };
 

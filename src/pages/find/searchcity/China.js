@@ -1,15 +1,15 @@
 import React from 'react';
 
-import {PermissionsAndroid, StyleSheet, Text, View, TouchableHighlight, Alert, ViewPropTypes} from 'react-native';
+import {Alert, ScrollView, SectionList, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
 import ScreenUtil from "src/util/ScreenUtil";
 import AweIcon from 'react-native-vector-icons/FontAwesome';
 import {Input} from 'react-native-elements';
-import {Geolocation} from "react-native-amap-geolocation";
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {SelectPlayingCityAction} from 'src/redux/actions/SelectPlayingCityAction';
 import {connect} from "react-redux";
 import LocationUtil from "src/util/LocationUtil";
-import * as StackNavigatorName from "src/constant/StackNavigatorName";
+import province from "../../../res/json/province.json";
+import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 
 class China extends React.Component {
@@ -55,6 +55,29 @@ class China extends React.Component {
 
         let listHeight = hotCities.length * itemHeight + Math.max(0, hotCities.length - 1) * gap;
 
+        let provinceData = [];
+
+        // let capitalLetters = [];
+
+        let charCodeA = 'A'.charCodeAt(0);
+
+        let allProvinceItemCount = 0;
+
+        for (let i = 0; i < 26; i++) {
+            let key = String.fromCharCode(charCodeA + i);
+
+            let value = province[key];
+
+            // console.log("key:" + key + " value:" + (value === undefined ? "undefind" : value.toString()));
+
+            if (value != undefined) {
+                provinceData.push({title: key, data: value});
+
+                allProvinceItemCount += 1 + value.length + 1;
+            }
+        }
+
+
         this.state = {
             city: '定位中',
             location: {},
@@ -63,19 +86,37 @@ class China extends React.Component {
             itemHeight: itemHeight,
             itemPaddingLeft: gap,
             hotCities: hotCities,
-            listHeight: listHeight
+            listHeight: listHeight,
+            province: provinceData,
+            allProvinceItemCount: allProvinceItemCount
         };
 
         this.getLocation = this.getLocation.bind(this);
         this.onGetLocation = this.onGetLocation.bind(this);
         this.selectCityClickHanlder = this.selectCityClickHanlder.bind(this);
+        this.getProvinceItemLayout = this.getProvinceItemLayout.bind(this);
+
+        this.getItemLayout = sectionListGetItemLayout({
+            // The height of the row with rowData at the given sectionIndex and rowIndex
+            getItemHeight: (rowData, sectionIndex, rowIndex) => ScreenUtil.scale(40),
+
+            // These four properties are optional
+            getSeparatorHeight: () => 0, // The height of your separators
+            getSectionHeaderHeight: () => ScreenUtil.scale(25), // The height of your section headers
+            getSectionFooterHeight: () => 0, // The height of your section footers
+            listHeaderHeight: 0, // The height of your list header
+        })
+
+        /*        for (let j = 0; j < 15; j++) {
+                    this.getProvinceItemLayout(null, j);
+                }*/
     }
 
     componentDidMount() {
         this.getLocation();
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
         this.isUnmount = true;
     }
 
@@ -119,6 +160,128 @@ class China extends React.Component {
         goBackToMain();
     }
 
+    renderSectionItem(item, index, section) {
+        return <View style={{
+            backgroundColor: '#ffffff',
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: ScreenUtil.scale(40)
+        }}>
+            <Text style={{marginLeft: this.state.itemPaddingLeft, color: '#494949', fontSize: ScreenUtil.scale(16)}}
+                  key={index}>{item}</Text>
+        </View>
+    }
+
+    renderSectionHeader(title) {
+        return <View style={{
+            backgroundColor: '#f4f4f4',
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: ScreenUtil.scale(26)
+        }}>
+
+            <Text style={{
+                marginLeft: this.state.itemPaddingLeft,
+                color: '#9b9b9b',
+                fontSize: ScreenUtil.scale(14),
+                height: ScreenUtil.scale(20)
+            }}>{title}</Text></View>
+    }
+
+    //可以直接用https://github.com/jsoendermann/rn-section-list-get-item-layout，这里自己试了下
+    //在最后一行不显示这里卡了好久，查了下https://stackoverflow.com/questions/46196242/react-native-flatlist-last-item-visibility-issue#
+    //contentContainerStyle={{ paddingBottom: 20}} 不过感觉这个方法不是很靠谱，应该是flatlist的bug
+    getProvinceItemLayout(data, index) {
+
+        // console.log("index:" + index);
+        let i = 0;
+
+        let $offset = 0;
+
+        let headHeight = 25;
+
+        let itemHeight = 40;
+
+        let isHeader = true;
+
+        let isTail = false;
+
+        let STATE_HEADER = 1;
+
+        let STATE_ITEM = 2;
+
+        let STATE_TAIL = 3;
+
+        state = STATE_HEADER;
+
+        let m = 0;
+
+        label = this.state.province[0].title;
+
+        while (i < index) {
+
+            state = STATE_HEADER;
+
+            let temp = this.state.province[m];
+
+            $offset += headHeight;
+
+            label = this.state.province[m + 1] != null ? this.state.province[m + 1].title : "";
+
+            i++;
+
+            if (i >= index) {
+
+                label = temp.data[0];
+
+                state = STATE_ITEM;
+
+                break;
+            }
+
+            let t1 = i + temp.data.length;
+
+            if (t1 < index) {
+                // state = STATE_ITEM;
+                $offset += itemHeight * temp.data.length;
+
+                i += temp.data.length;
+            }
+            else if (t1 === index) {
+                state = STATE_TAIL;
+
+                $offset += itemHeight * temp.data.length;
+
+                label = "tail";
+
+                break;
+            }
+            else {
+                state = STATE_ITEM;
+
+                $offset += itemHeight * (index - i);
+
+                label = temp.data[index - i];
+
+                break;
+            }
+
+
+            i++;
+
+            state = STATE_HEADER;
+
+            m++;
+            // console.log("index:" + index + temp === undefined ? " undefined" : JSON.stringify(temp));
+        }
+
+        let $length = state == STATE_HEADER ? headHeight : (state == STATE_TAIL ? 0 : itemHeight);
+
+        console.log("index:" + index + " label:" + label + " length:" + $length + " offset:" + $offset);
+        return {length: ScreenUtil.scale($length), offset: ScreenUtil.scale($offset), index};
+        // console.log("label:" + label + " index:" + index + " isHeader:" + isHeader + " height:" + height);
+    }
+
     render() {
         return <View>
 
@@ -149,7 +312,7 @@ class China extends React.Component {
                    autoCorrect={false}
             />
 
-            <View style={{width: '100%', backgroundColor: '#f4f4f4', flexDirection: 'column'}}>
+            <ScrollView style={{width: '100%', backgroundColor: '#f4f4f4', flexDirection: 'column'}}>
                 <Text
                     style={{
                         marginLeft: this.state.itemPaddingLeft, marginTop: this.state.paddingTop,
@@ -193,18 +356,25 @@ class China extends React.Component {
                     {
 
                         this.state.hotCities.map((v, k) => {
-                            return<View key={k}
-                                style={{flexDirection: 'row', width: '100%', height:this.state.itemHeight, justifyContent: 'space-between',}}>
+                            return <View key={k}
+                                         style={{
+                                             flexDirection: 'row',
+                                             width: '100%',
+                                             height: this.state.itemHeight,
+                                             justifyContent: 'space-between',
+                                         }}>
                                 {
                                     v.map((cityV, cityKey) => {
-                                        return  <TouchableHighlight key={cityKey} onPress={() => this.selectCityClickHanlder(cityV)}><View style={{
-                                            flexDirection: 'row',
-                                            width: this.state.itemWidth,
-                                            height: this.state.itemHeight,
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            backgroundColor: '#ffffff'
-                                        }}>
+                                        return <TouchableHighlight key={cityKey}
+                                                                   onPress={() => this.selectCityClickHanlder(cityV)}><View
+                                            style={{
+                                                flexDirection: 'row',
+                                                width: this.state.itemWidth,
+                                                height: this.state.itemHeight,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                backgroundColor: '#ffffff'
+                                            }}>
                                             <Text style={{
                                                 color: '#484848',
                                                 fontSize: ScreenUtil.scale(16)
@@ -216,7 +386,19 @@ class China extends React.Component {
                         })
                     }
                 </View>
-            </View>
+
+                <SectionList
+                    renderItem={({item, index, section}) => this.renderSectionItem(item, index, section)}
+                    renderSectionHeader={({section: {title}}) => this.renderSectionHeader(title)}
+                    sections={this.state.province}
+                    keyExtractor={(item, index) => item + index}
+                    getItemLayout={this.getItemLayout}
+                    initialNumToRender={this.state.allProvinceItemCount}
+                    contentContainerStyle={{paddingBottom: ScreenUtil.scale(50)}}
+                />
+
+            </ScrollView>
+
 
         </View>
     }
@@ -227,7 +409,7 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-    return {reduxChangeCity: (cityName)=> dispatch(SelectPlayingCityAction(cityName))};
+    return {reduxChangeCity: (cityName) => dispatch(SelectPlayingCityAction(cityName))};
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(China);
