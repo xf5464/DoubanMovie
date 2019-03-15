@@ -45,13 +45,24 @@ export default class PulldownFlatList extends React.Component {
         this._tryPullDown = this._tryPullDown.bind(this);
 
         this.getItemLayout = this.getItemLayout.bind(this);
+
+        this.PanelisMounted = false;
+    }
+
+    componentWillUnmount() {
+        this.PanelisMounted = false;
     }
 
     componentDidMount() {
+
+        if (this.PanelisMounted) {
+            return;
+        }
+
+        this.PanelisMounted = true;
+
         this.onListRefresh();
     }
-
-    componentDidU
 
     getFullUrl(remoteUrl) {
         return "";

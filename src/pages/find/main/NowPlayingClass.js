@@ -252,6 +252,11 @@ export default class NowPlayingClass extends PulldownFlatList {
     }
 
     componentWillReceiveProps(nextProps) {
+
+        if (!this.PanelisMounted) {
+            return;
+        }
+
         console.log('nextProps:' + JSON.stringify(nextProps) + " tab:" + this.state.tabName);
 
         const {cityName} = this.props;

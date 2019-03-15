@@ -1,6 +1,17 @@
 import React from 'react';
 
-import {Alert, ScrollView, SectionList, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
+import {
+    Alert,
+    ScrollView,
+    SectionList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    TouchableHighlight,
+    View,
+    UIManager,
+    findNodeHandle
+} from 'react-native';
 import ScreenUtil from "src/util/ScreenUtil";
 import AweIcon from 'react-native-vector-icons/FontAwesome';
 import {Input} from 'react-native-elements';
@@ -8,8 +19,9 @@ import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {SelectPlayingCityAction} from 'src/redux/actions/SelectPlayingCityAction';
 import {connect} from "react-redux";
 import LocationUtil from "src/util/LocationUtil";
+import HorizontalRule from "src/pages/common/ui/HorizontalRule";
 import province from "../../../res/json/province.json";
-import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
+import PropTypes from 'prop-types';
 
 
 class China extends React.Component {
@@ -63,6 +75,8 @@ class China extends React.Component {
 
         let allProvinceItemCount = 0;
 
+        let capitalLetters = [];
+
         for (let i = 0; i < 26; i++) {
             let key = String.fromCharCode(charCodeA + i);
 
@@ -70,8 +84,17 @@ class China extends React.Component {
 
             // console.log("key:" + key + " value:" + (value === undefined ? "undefind" : value.toString()));
 
-            if (value != undefined) {
-                provinceData.push({title: key, data: value});
+            if (value !== undefined) {
+
+                let data = [];
+
+                capitalLetters.push(key);
+
+                value.map((item, index) => {
+                    data.push({label: item, isLast: index === value.length - 1})
+                });
+
+                provinceData.push({title: key, data: data});
 
                 allProvinceItemCount += 1 + value.length + 1;
             }
@@ -88,28 +111,22 @@ class China extends React.Component {
             hotCities: hotCities,
             listHeight: listHeight,
             province: provinceData,
-            allProvinceItemCount: allProvinceItemCount
+            allProvinceItemCount: allProvinceItemCount,
+            capitalLetters: capitalLetters,
+            panelGlobalY: 0,//这个页面的y
+            sectionViewY: -1, ///滚动页面的y
+            letterNavigatorHeight: 0,
+            couldShowLetters: false
         };
 
         this.getLocation = this.getLocation.bind(this);
         this.onGetLocation = this.onGetLocation.bind(this);
         this.selectCityClickHanlder = this.selectCityClickHanlder.bind(this);
         this.getProvinceItemLayout = this.getProvinceItemLayout.bind(this);
-
-        this.getItemLayout = sectionListGetItemLayout({
-            // The height of the row with rowData at the given sectionIndex and rowIndex
-            getItemHeight: (rowData, sectionIndex, rowIndex) => ScreenUtil.scale(40),
-
-            // These four properties are optional
-            getSeparatorHeight: () => 0, // The height of your separators
-            getSectionHeaderHeight: () => ScreenUtil.scale(25), // The height of your section headers
-            getSectionFooterHeight: () => 0, // The height of your section footers
-            listHeaderHeight: 0, // The height of your list header
-        })
-
-        /*        for (let j = 0; j < 15; j++) {
-                    this.getProvinceItemLayout(null, j);
-                }*/
+        this.onFullPanelLayout = this.onFullPanelLayout.bind(this);
+        this.getLetterComponent = this.getLetterComponent.bind(this);
+        this.goSelectTargetProvince = this.goSelectTargetProvince.bind(this);
+        this.onSectionListLayout = this.onSectionListLayout.bind(this);
     }
 
     componentDidMount() {
@@ -138,8 +155,6 @@ class China extends React.Component {
         }
 
         this.setState({city: location.city.replace("市", ""), location: location});
-
-        // console.log(location.toString())
     }
 
     selectCityClickHanlder(name) {
@@ -161,6 +176,19 @@ class China extends React.Component {
     }
 
     renderSectionItem(item, index, section) {
+
+        let gapLine = <View/>;
+
+        if (!item.isLast) {
+            gapLine = <HorizontalRule lineStyle={{
+                borderBottomColor: '#efefef',
+                width: '100%',
+                position: 'absolute',
+                bottom: 0,
+                left: this.state.itemPaddingLeft,
+            }}/>
+        }
+
         return <View style={{
             backgroundColor: '#ffffff',
             flexDirection: 'row',
@@ -168,7 +196,10 @@ class China extends React.Component {
             height: ScreenUtil.scale(40)
         }}>
             <Text style={{marginLeft: this.state.itemPaddingLeft, color: '#494949', fontSize: ScreenUtil.scale(16)}}
-                  key={index}>{item}</Text>
+                  key={index}>{item.label}</Text>
+
+            {gapLine}
+
         </View>
     }
 
@@ -202,9 +233,7 @@ class China extends React.Component {
 
         let itemHeight = 40;
 
-        let isHeader = true;
-
-        let isTail = false;
+        let separatorHeight = 1;
 
         let STATE_HEADER = 1;
 
@@ -212,11 +241,11 @@ class China extends React.Component {
 
         let STATE_TAIL = 3;
 
-        state = STATE_HEADER;
+        let state = STATE_HEADER;
 
         let m = 0;
 
-        label = this.state.province[0].title;
+        // label = this.state.province[0].title;
 
         while (i < index) {
 
@@ -226,13 +255,13 @@ class China extends React.Component {
 
             $offset += headHeight;
 
-            label = this.state.province[m + 1] != null ? this.state.province[m + 1].title : "";
+            // label = this.state.province[m + 1] != null ? this.state.province[m + 1].title : "";
 
             i++;
 
             if (i >= index) {
 
-                label = temp.data[0];
+                // label = temp.data[0];
 
                 state = STATE_ITEM;
 
@@ -245,6 +274,8 @@ class China extends React.Component {
                 // state = STATE_ITEM;
                 $offset += itemHeight * temp.data.length;
 
+                $offset += separatorHeight * Math.max(0, temp.data.length - 1);
+
                 i += temp.data.length;
             }
             else if (t1 === index) {
@@ -252,7 +283,7 @@ class China extends React.Component {
 
                 $offset += itemHeight * temp.data.length;
 
-                label = "tail";
+                // label = "tail";
 
                 break;
             }
@@ -261,7 +292,7 @@ class China extends React.Component {
 
                 $offset += itemHeight * (index - i);
 
-                label = temp.data[index - i];
+                // label = temp.data[index - i];
 
                 break;
             }
@@ -275,15 +306,107 @@ class China extends React.Component {
             // console.log("index:" + index + temp === undefined ? " undefined" : JSON.stringify(temp));
         }
 
-        let $length = state == STATE_HEADER ? headHeight : (state == STATE_TAIL ? 0 : itemHeight);
+        let $length = state === STATE_HEADER ? headHeight : (state === STATE_TAIL ? 0 : itemHeight);
 
-        console.log("index:" + index + " label:" + label + " length:" + $length + " offset:" + $offset);
         return {length: ScreenUtil.scale($length), offset: ScreenUtil.scale($offset), index};
-        // console.log("label:" + label + " index:" + index + " isHeader:" + isHeader + " height:" + height);
+    }
+
+    onFullPanelLayout(event) {
+
+        if (this.state.panelGlobalY !== 0) {
+            return;
+        }
+
+        // console.log("onFullPanelLayout:" + JSON.stringify(event.nativeEvent.layout));
+
+        let fullPanelRef = this.fullPanelRef;
+
+        const handle = findNodeHandle(fullPanelRef);
+
+        let self = this;
+
+        UIManager.measure(handle, (x, y, width, height, pageX, pageY) => {
+            console.log(x, y, width, height, pageX, pageY);
+
+            let $scrollViewPageY = Number.parseInt(pageY);
+
+            self.setState({letterNavigatorHeight: ScreenUtil.getScreenHeight() - $scrollViewPageY});
+        });
+
+
+    }
+
+    goSelectTargetProvince(letter) {
+
+        if (this.state.sectionViewY == -1) {
+            return;
+        }
+
+
+        let index = 0;
+
+        for (let i = 0; i < this.state.province.length; i++) {
+
+            if (letter === this.state.province[i].title) {
+
+                let obj = this.getProvinceItemLayout(null, index);
+
+                let targetPosition = this.state.sectionViewY + obj.offset;
+
+                console.log("targetLetter:" + letter + " sectionViewY:" + this.state.sectionViewY + " offset:" + obj.offset);
+
+                this.scrollViewRef.scrollTo({x: 0, y: targetPosition});
+
+                return;
+            }
+            else
+            {
+                index += 1 + this.state.province[i].data.length + 1;
+            }
+
+        }
+    }
+
+    onSectionListLayout(event) {
+
+        if (this.state.sectionViewY !== -1) {
+            return;
+        }
+
+        this.setState({sectionViewY: event.nativeEvent.layout.y});
+    }
+
+    getLetterComponent() {
+
+        if (this.state.letterNavigatorHeight === 0) {
+            return <View/>
+        }
+
+        return <View
+            style={{
+                flexDirection: 'column',
+                width: this.state.itemPaddingLeft,
+                height: this.state.letterNavigatorHeight,
+                position: 'absolute', right: 0,
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}>
+            {
+                this.state.capitalLetters.map((item, index) => {
+                    return <TouchableHighlight key={index}  onPress={() => {this.goSelectTargetProvince(item)}}>
+                        <Text style={{fontWeight: 'bold', color: '#1685fd', width: this.state.itemPaddingLeft,
+                            fontSize: ScreenUtil.scale(12), textAlign: 'center',
+                        }}>{item}</Text></TouchableHighlight>
+                })
+            }
+        </View>
     }
 
     render() {
-        return <View>
+        return <View onLayout={this.onFullPanelLayout}
+                     ref={(ref) => {
+                         this.fullPanelRef = ref
+                     }}>
 
             <Input placeholder='输入城市名称查询'
                    leftIcon={
@@ -312,7 +435,9 @@ class China extends React.Component {
                    autoCorrect={false}
             />
 
-            <ScrollView style={{width: '100%', backgroundColor: '#f4f4f4', flexDirection: 'column'}}>
+            <ScrollView
+                ref={(ref) => {this.scrollViewRef = ref}}
+                style={{width: '100%', backgroundColor: '#f4f4f4', flexDirection: 'column'}}>
                 <Text
                     style={{
                         marginLeft: this.state.itemPaddingLeft, marginTop: this.state.paddingTop,
@@ -365,7 +490,7 @@ class China extends React.Component {
                                          }}>
                                 {
                                     v.map((cityV, cityKey) => {
-                                        return <TouchableHighlight key={cityKey}
+                                        return <TouchableOpacity key={cityKey}
                                                                    onPress={() => this.selectCityClickHanlder(cityV)}><View
                                             style={{
                                                 flexDirection: 'row',
@@ -379,7 +504,7 @@ class China extends React.Component {
                                                 color: '#484848',
                                                 fontSize: ScreenUtil.scale(16)
                                             }}>{cityV}</Text>
-                                        </View></TouchableHighlight>
+                                        </View></TouchableOpacity>
                                     })
                                 }
                             </View>
@@ -388,6 +513,8 @@ class China extends React.Component {
                 </View>
 
                 <SectionList
+                    onLayout={this.onSectionListLayout}
+                    ref={(ref)=> {this.provinceList = ref}}
                     renderItem={({item, index, section}) => this.renderSectionItem(item, index, section)}
                     renderSectionHeader={({section: {title}}) => this.renderSectionHeader(title)}
                     sections={this.state.province}
@@ -398,6 +525,8 @@ class China extends React.Component {
                 />
 
             </ScrollView>
+
+            {this.getLetterComponent()}
 
 
         </View>

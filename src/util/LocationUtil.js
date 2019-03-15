@@ -6,6 +6,9 @@ import {PermissionsAndroid} from "react-native";
 export default class LocationUtil extends React.Component {
 
     static async getLocation(onGetLocation) {
+
+        onGetLocation({city:"杭州"});
+        return;
         const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
         );
