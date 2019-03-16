@@ -2,7 +2,7 @@ import React from 'react';
 import {createAppContainer, createStackNavigator} from 'react-navigation';
 import {StyleSheet} from 'react-native';
 import Main from './main/Main';
-import SearchCity from './searchcity/SearchProvince';
+import SearchCity from './searchcity/SearchCityNavigator';
 import searchMovie from './searchmovie/SearchMovie';
 
 const App = createStackNavigator({
