@@ -548,7 +548,7 @@ class China extends React.Component {
                     sections={this.state.province}
                     keyExtractor={(item, index) => item + index}
                     getItemLayout={this.getItemLayout}
-                    initialNumToRender={this.state.allProvinceItemCount}
+                    // initialNumToRender={this.state.allProvinceItemCount}
                     contentContainerStyle={{paddingBottom: ScreenUtil.scale(50)}}
                 />
 
