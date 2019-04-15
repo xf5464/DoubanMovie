@@ -17,6 +17,7 @@ import AweIcon from 'react-native-vector-icons/FontAwesome';
 import {Input} from 'react-native-elements';
 import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {SelectPlayingCityAction} from 'src/redux/actions/SelectPlayingCityAction';
+import {ChangeCityNameSearchVisibleAction} from 'src/redux/actions/ChangeCityNameSearchVisibleAction';
 import {connect} from "react-redux";
 import LocationUtil from "src/util/LocationUtil";
 import HorizontalRule from "src/pages/common/ui/HorizontalRule";
@@ -130,6 +131,8 @@ class China extends React.Component {
         this.getLetterComponent = this.getLetterComponent.bind(this);
         this.goSelectTargetProvince = this.goSelectTargetProvince.bind(this);
         this.onSectionListLayout = this.onSectionListLayout.bind(this);
+        this.onInputFocusHandler = this.onInputFocusHandler.bind(this);
+        this.getInput = this.getInput.bind(this);
     }
 
     componentDidMount() {
@@ -429,38 +432,62 @@ class China extends React.Component {
         </View>
     }
 
+    onInputFocusHandler() {
+        console.log("onInputFocusHandler onFocus");
+
+        const {changeSearchCityPop} = this.props;
+
+        changeSearchCityPop(true)
+    }
+
+    getInput() {
+        const {showPop1} = this.props;
+
+        if (showPop1) {
+            return <View/>
+        }
+        else
+        {
+            return  <Input placeholder='输入城市名称查询'
+
+                           onFocus={this.onInputFocusHandler}
+
+                           leftIcon={
+                               <AweIcon
+                                   name='search'
+                                   size={ScreenUtil.scale(16)}
+                                   color='#9b9b9b'
+                               />
+                           }
+
+                           inputStyle={{
+                               fontSize: ScreenUtil.scale(16),
+                               color: '#9b9b9b',
+                               marginTop: ScreenUtil.scale(3),
+                               marginLeft: ScreenUtil.scale(10)
+                           }}
+
+                           inputContainerStyle={{borderBottomWidth: 0, height: '100%'}}
+
+                           containerStyle={{
+                               height: ScreenUtil.scale(40),
+                               alignItems: 'center',
+                               marginTop: ScreenUtil.scale(7)
+                           }}
+
+                           autoCorrect={false}
+            />
+        }
+    }
+
     render() {
         return <View onLayout={this.onFullPanelLayout}
                      ref={(ref) => {
                          this.fullPanelRef = ref
                      }}>
 
-            <Input placeholder='输入城市名称查询'
-                   leftIcon={
-                       <AweIcon
-                           name='search'
-                           size={ScreenUtil.scale(16)}
-                           color='#9b9b9b'
-                       />
-                   }
 
-                   inputStyle={{
-                       fontSize: ScreenUtil.scale(16),
-                       color: '#9b9b9b',
-                       marginTop: ScreenUtil.scale(3),
-                       marginLeft: ScreenUtil.scale(10)
-                   }}
-
-                   inputContainerStyle={{borderBottomWidth: 0, height: '100%'}}
-
-                   containerStyle={{
-                       height: ScreenUtil.scale(40),
-                       alignItems: 'center',
-                       marginTop: ScreenUtil.scale(7)
-                   }}
-
-                   autoCorrect={false}
-            />
+            {this.getInput()}
 
             <ScrollView
                 ref={(ref) => {
@@ -562,11 +589,12 @@ class China extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-    return state;
+    return { showPop1: state.selectPlayingCityReducer.showSearchCityPop};
 };
 
 const mapDispatchToProps = (dispatch) => {
-    return {reduxChangeCity: (cityName) => dispatch(SelectPlayingCityAction(cityName))};
+    return {reduxChangeCity: (cityName) => dispatch(SelectPlayingCityAction(cityName)),
+            changeSearchCityPop: (value) => dispatch(ChangeCityNameSearchVisibleAction(value))};
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(China);

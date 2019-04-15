@@ -8,6 +8,12 @@ import {ChangeMainBarVisibleAction} from "src/redux/actions/ChangeMainBarVisible
 class InitAppLayer extends React.Component {
 
 
+    constructor(props) {
+        super(props);
+
+        this.state = {lastHideMainBottomBarFlag: false}
+    }
+
     componentDidMount() {
         this.keyBoardShowListener = Keyboard.addListener('keyboardDidShow', this.keyBoardShowHandler.bind(this));
 
@@ -28,6 +34,16 @@ class InitAppLayer extends React.Component {
 
     keyBoardShowHandler() {
         // console.log('key border show');
+        const {hideBottom} = this.props;
+
+        if (hideBottom) {
+            this.state.lastHideMainBottomBarFlag = true;
+
+            return;
+        }
+
+        this.state.lastHideMainBottomBarFlag = false;
+
 
         const {hideBottomBarHandler} = this.props;
 
@@ -36,6 +52,10 @@ class InitAppLayer extends React.Component {
 
     keyBoardHideHandler() {
         // console.log('key border hide');
+
+        if ( this.state.lastHideMainBottomBarFlag) {
+            return;
+        }
 
         const {hideBottomBarHandler} = this.props;
 
@@ -48,7 +68,7 @@ class InitAppLayer extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-    return state;
+    return {hideBottom: state.changeMainBarVisibleReducer.needHide};
 };
 
 const mapDispatchToProps = (dispatch) => {

@@ -1,16 +1,17 @@
 import React from 'react';
-import {Alert, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import AweIcon from 'react-native-vector-icons/FontAwesome5';
 import ScreenUtil from "src/util/ScreenUtil";
 import HorizontalRule from "src/pages/common/ui/HorizontalRule";
 import ChinaProvince from "./ChinaProvince";
 import Overseas from "./Overseas";
-import ScrollableTabView,{DefaultTabBar} from "react-native-scrollable-tab-view";
+import ScrollableTabView from "react-native-scrollable-tab-view";
 import {connect} from 'react-redux';
 import {ChangeMainBarVisibleAction} from "src/redux/actions/ChangeMainBarVisibleAction";
 import * as StackNavigatorName from "src/constant/StackNavigatorName";
 import CustomTopBar from "./bar/CustomTopBar";
 import {SelectPlayingCityAction} from "src/redux/actions/SelectPlayingCityAction";
+import SearchCityPop1 from "./SearchCityPop1";
 
 class SearchProvince extends React.Component {
 
@@ -24,6 +25,8 @@ class SearchProvince extends React.Component {
         this.textLayoutCallback = this.textLayoutCallback.bind(this);
 
         this.navigateToCityFromProvince = this.navigateToCityFromProvince.bind(this);
+
+        this.getHeader = this.getHeader.bind(this);
 
         this.state = {
             selectTabIndex: 0,
@@ -89,7 +92,7 @@ class SearchProvince extends React.Component {
 
     navigateToCityFromProvince(cities, provinceName) {
 
-        if (cities.length == 1) {
+        if (cities.length === 1) {
 
             const {hideBottomBarHandler} = this.props;
 
@@ -102,17 +105,27 @@ class SearchProvince extends React.Component {
             this.props.navigation.navigate(StackNavigatorName.FIND_MAIN_TAB);
 
             return;
-        };
+        }
 
         this.props.navigation.navigate(StackNavigatorName.SEARCH_CITY_OF_PROVINCE_TAB,{dataList: cities, provinceName: provinceName, arrowLeft: this.state.labelTipLeft});
     }
 
-    render() {
+    searchCityNamePopGet() {
+        const {showPop1} = this.props;
 
-        let self = this;
+        if (showPop1) {
+            return <SearchCityPop1 goBackToMain={this._goBack}/>
+        }
+        else {
+            return <View/>
+        }
+    }
 
-        return <View style={{flex: 1}}>
-            <View  style={{flexDirection: 'row', width: '100%', alignItems: 'center', height: ScreenUtil.scale(50)}}>
+    getHeader() {
+        const {showPop1} = this.props;
+
+        if (!showPop1) {
+            return      <View  style={{flexDirection: 'row', width: '100%', alignItems: 'center', height: ScreenUtil.scale(50)}}>
 
                 <TouchableOpacity onPress={() => {this._goBack()}}>
                     <View  style={{flexDirection: 'row', width: ScreenUtil.scale(this.state.labelTipLeft), height:'100%', alignItems: 'center'}}>
@@ -122,19 +135,29 @@ class SearchProvince extends React.Component {
                 </TouchableOpacity>
 
                 <Text style={{position: 'absolute', left: this.state.labelTipLeft, fontSize: ScreenUtil.scale(18)}}>选择城市</Text>
-  {/*              <ButtonGroup
-                    onPress={this._updateSelectIndex}
-                    selectedIndex={this.state.selectTabIndex}
-                    buttons={["国内", "海外"]}
-                    containerStyle={{height: 40, width: 200, borderColor: '#494949'}}
-                    selectedButtonStyle={{backgroundColor: '#494949'}}
-                    textStyle={{fontSize: ScreenUtil.scale(16)}} />*/}
 
             </View>
+        }
+        else
+        {
+            return <View/>
+        }
+
+    }
+
+    render() {
+
+        let self = this;
+
+        // let searchCityNamePopGet = this.searchCityNamePopGet;
+
+        return <View style={{flex: 1}}>
+
+            {this.getHeader()}
 
             <HorizontalRule lineStyle={{marginTop: 5, borderBottomColor: '#b2b2b2', borderBottomWidth: StyleSheet.hairlineWidth}}/>
 
-            <ScrollableTabView style={{flex: 1}}
+            <ScrollableTabView style={{flex: 1, height: ScreenUtil.scale(50)}}
                                ref={'tabScrollView'}
                                tabBarTextStyle={{fontSize:ScreenUtil.scale(16), alignItems: 'center'}}
                                tabBarActiveTextColor={'#9fdaac'}
@@ -148,12 +171,16 @@ class SearchProvince extends React.Component {
                 <Overseas  tabLabel={'海外'}/>
 
             </ScrollableTabView>
+
+
+            {this.searchCityNamePopGet()}
+
         </View>
     }
 }
 
 const mapStateToProps = (state) => {
-    return state;
+    return { showPop1: state.selectPlayingCityReducer.showSearchCityPop};
 };
 
 const mapDispatchToProps = (dispatch) => {
