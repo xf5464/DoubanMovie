@@ -10,6 +10,8 @@ import cities from "../../../res/json/city.json";
 import PropTypes from 'prop-types';
 import {SelectPlayingCityAction} from "src/redux/actions/SelectPlayingCityAction";
 
+var pinyin = require("pinyin");
+
 //点击搜索框弹出
 class SearchCityPop1 extends React.Component {
 
@@ -40,6 +42,11 @@ class SearchCityPop1 extends React.Component {
         for (let i = 0; i < config.length; i++) {
             $allCities = $allCities.concat(config[i].citys)
         }
+
+        //排序
+        $allCities.sort( function compareFunction(param1, param2) {
+            return pinyin.compare(param1.citysName, param2.citysName)
+        });
 
         this.allCities = $allCities;
     }
@@ -111,7 +118,7 @@ class SearchCityPop1 extends React.Component {
 
         this.searchCityByInput(e.nativeEvent.text);
 
-        let list =  this.ref["cityList"];
+        // let list =  this.ref["cityList"];
     }
 
     getContent() {
@@ -165,10 +172,13 @@ class SearchCityPop1 extends React.Component {
     }
 
     searchCityByInput(inputText) {
+        // inputText = "州";
         let ret = [];
 
         for (let i = 0; i < this.allCities.length; i++) {
             if (this.allCities[i].citysName.indexOf(inputText) >= 0) {
+
+                console.log(this.allCities[i].citysName);
                 ret.push(this.allCities[i].citysName);
             }
         }
